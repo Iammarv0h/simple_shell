@@ -20,31 +20,19 @@ void execute_builtin_commands(char** args) {
     // ... (unchanged)
 }
 
-// Function to handle external command execution with error handling
+// Function to execute external commands using execve()
 void execute_external_commands(char** args) {
     pid_t pid = fork();
     if (pid == 0) {
         // Child process
-        execvp(args[0], args);
-        perror(args[0]); // Print error message similar to Linux shell
+        execve(args[0], args, NULL);
+        perror(args[0]); // This line will only execute if execve fails
         exit(EXIT_FAILURE);
     } else if (pid < 0) {
         perror("fork");
     } else {
         // Parent process
-        int status;
-        waitpid(pid, &status, 0);
-
-        // Check if the child exited normally
-        if (WIFEXITED(status)) {
-            int exit_status = WEXITSTATUS(status);
-            if (exit_status != 0) {
-                fprintf(stderr, "MyShell: %s: Exit status %d\n", args[0], exit_status);
-            }
-        } else if (WIFSIGNALED(status)) {
-            int signal_num = WTERMSIG(status);
-            fprintf(stderr, "MyShell: %s: Terminated by signal %d\n", args[0], signal_num);
-        }
+        waitpid(pid, NULL, 0);
     }
 }
 
@@ -69,7 +57,7 @@ int main() {
             // Handle built-in commands
             execute_builtin_commands(args);
 
-            // Execute external commands with error handling
+            // Execute external commands using execve()
             execute_external_commands(args);
 
             if (strcmp(input, "exit") == 0) {
@@ -80,3 +68,4 @@ int main() {
 
     return 0;
 }
+
