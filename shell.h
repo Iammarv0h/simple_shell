@@ -13,4 +13,6 @@ int parse_input(char *input, char **args);
 
 char *get_location(char *command);
 
+char *custom_getline(void);
+
 #endif /* MAIN_H */
