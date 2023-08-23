@@ -19,6 +19,11 @@
  */
 int parse_input(char *input, char **args);
 
+/**
+ * main - Main function for the shell
+ * 
+ * Return: Always 0
+ */
 int main(void)
 {
     while (1)
@@ -35,94 +40,59 @@ int main(void)
 
         input[strcspn(input, "\n")] = '\0';
 
-        /* Parse input into arguments*/
+        /* Parse input into arguments */
         char *args[MAX_ARGS];
         int arg_count = parse_input(input, args);
 
         if (arg_count > 0)
         {
-            /*Handle built-in commands (same as before)*/
-        }
-
-        /* Implement input and output redirection*/
-        int input_fd = STDIN_FILENO;
-        int output_fd = STDOUT_FILENO;
-
-        /* Check for input redirection*/
-        int i;
-        for (i = 0; i < arg_count; i++)
-        {
-            if (strcmp(args[i], "<") == 0)
+            if (strcmp(args[0], "exit") == 0)
             {
-                args[i] = NULL;
-                i++;
-                input_fd = open(args[i], O_RDONLY);
-                if (input_fd == -1)
-                {
-                    perror("open");
-                    exit(EXIT_FAILURE);
-                }
+                /* Exit the shell */
+                printf("Exiting the shell...\n");
                 break;
             }
-        }
 
-        /* Check for output redirection*/
-        for (i = 0; i < arg_count; i++)
-        {
-            if (strcmp(args[i], ">") == 0)
+            /* Fork a new process */
+            pid_t child_pid = fork();
+
+            if (child_pid == -1)
             {
-                args[i] = NULL;
-                i++;
-                output_fd = open(args[i], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-                if (output_fd == -1)
-                {
-                    perror("open");
-                    exit(EXIT_FAILURE);
-                }
-                break;
+                perror("fork");
+                exit(EXIT_FAILURE);
             }
-        }
+            else if (child_pid == 0)
+            {
+                /* Child process code */
 
-        /* Fork and execute the command*/
-        pid_t pid = fork();
-        if (pid == 0)
-        {
-            /* Child process*/
-            dup2(input_fd, STDIN_FILENO);
-            dup2(output_fd, STDOUT_FILENO);
+                /* Execute the command */
+                execvp(args[0], args);
 
-            execvp(args[0], args);
-            perror("execvp");
-            exit(EXIT_FAILURE);
-        }
-        else if (pid < 0)
-        {
-            perror("fork");
-        }
-        else
-        {
-            /*Parent process*/
-            waitpid(pid, NULL, 0);
-        }
+                /* If execvp returns, there was an error */
+                perror("execvp");
+                exit(EXIT_FAILURE);
+            }
+            else
+            {
+                /* Parent process code */
 
-        /* Close file descriptors*/
-        if (input_fd != STDIN_FILENO)
-        {
-            close(input_fd);
-        }
-        if (output_fd != STDOUT_FILENO)
-        {
-            close(output_fd);
-        }
+                /* Wait for the child process to complete */
+                int child_status;
+                waitpid(child_pid, &child_status, 0);
 
-        if (strcmp(args[0], "exit") == 0)
-        {
-            /* Clean up and exit*/
-            break;
+                if (WIFEXITED(child_status))
+                {
+                    printf("Child process exited with status: %d\n", WEXITSTATUS(child_status));
+                }
+                else
+                {
+                    printf("Child process did not exit normally.\n");
+                }
+            }
         }
     }
 
-    return EXIT_SUCCESS;
+    return (0);
 }
 
 /**
@@ -134,6 +104,17 @@ int main(void)
  */
 int parse_input(char *input, char **args)
 {
-    // ... (implementation as before)
+    int arg_count = 0;
+    char *token = strtok(input, " ");
+
+    while (token != NULL && arg_count < MAX_ARGS - 1)
+    {
+        args[arg_count] = token;
+        arg_count++;
+        token = strtok(NULL, " ");
+    }
+
+    args[arg_count] = NULL; /* Set the last element to NULL for execvp */
+    return (arg_count);
 }
 
