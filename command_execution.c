@@ -7,7 +7,7 @@
  * @argv: An array of strings representing the command and its arguments
  *
  * This function executes the specified command along with its arguments.
- * handles forking child process and executing the command in the child process
+ * It handles forking a child process and executing the command in the child process.
  * The parent process waits for the child process to complete.
  */
 
@@ -21,7 +21,6 @@ void execmd(char **argv)
 		if (actual_command)
 		{
 			pid_t child_pid = fork();
-
 			if (child_pid == -1)
 			{
 				perror("Fork failed");
@@ -43,9 +42,10 @@ void execmd(char **argv)
 				/* Free memory */
 				free(actual_command);
 			}
-			else
-			{
-				printf("Command not found: %s\n", command);
-			}
 		}
+		else
+		{
+			printf("Command not found: %s\n", command);
+		}
+	}
 }
