@@ -19,7 +19,13 @@ int main(void) {
         arg_count = parse_input(lineptr, args);
 
         if (arg_count > 0) {
-            execmd(args);
+            if (strcmp(args[0], "setenv") == 0) {
+                shell_setenv(args);
+            } else if (strcmp(args[0], "unsetenv") == 0) {
+                shell_unsetenv(args);
+            } else {
+                execmd(args);
+            }
         }
 
         free(lineptr);

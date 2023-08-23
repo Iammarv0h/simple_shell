@@ -15,4 +15,8 @@ char *get_location(char *command);
 
 char *custom_getline(void);
 
+int shell_setenv(char **args);
+
+int shell_unsetenv(char **args);
+
 #endif /* MAIN_H */
