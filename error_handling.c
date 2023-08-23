@@ -7,69 +7,89 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-#define MAX_INPUT_SIZE 1024
-#define MAX_ARGS 64
-
-// Function to parse input into arguments (same as before)
-int parse_input(char* input, char** args) {
-    // ... (unchanged)
+/**
+ * parse_input - Parse input into arguments
+ * @input: Input string
+ * @args: Argument array
+ * Return: Number of arguments
+ */
+int parse_input(char *input, char **args)
+{
+    int arg_count = 0;
+    // ... (implementation of parse_input as before)
+    return arg_count;
 }
 
-int main() {
-    while (1) {
+/**
+ * main - Entry point for the shell with error handling
+ * Return: 0 on success, otherwise error code
+ */
+int main(void)
+{
+    while (1)
+    {
         char input[MAX_INPUT_SIZE];
 
         printf("MyShell> ");
-        
-        if (fgets(input, sizeof(input), stdin) == NULL) {
+
+        if (fgets(input, sizeof(input), stdin) == NULL)
+        {
             perror("fgets");
             exit(EXIT_FAILURE);
         }
 
         input[strcspn(input, "\n")] = '\0';
 
-        // Parse input into arguments
-        char* args[MAX_ARGS];
+        char *args[MAX_ARGS];
         int arg_count = parse_input(input, args);
 
-        if (arg_count > 0) {
-            // Handle built-in commands (same as before)
+        if (arg_count > 0)
+        {
+            // Handle built-in commands
+            if (strcmp(args[0], "exit") == 0)
+            {
+                exit(0);
+            }
+            else if (strcmp(args[0], "cd") == 0)
+            {
+                // ... (handle cd command)
+            }
+            // ... (handle other built-in commands)
         }
 
-        // Implement input and output redirection (same as before)
-
-        // Fork and execute the command
         pid_t pid = fork();
-        if (pid == 0) {
-            // Child process
+        if (pid == 0)
+        {
             execvp(args[0], args);
-            perror(args[0]); // Print error message similar to Linux shell
+            perror(args[0]);
             exit(EXIT_FAILURE);
-        } else if (pid < 0) {
+        }
+        else if (pid < 0)
+        {
             perror("fork");
-        } else {
-            // Parent process
+            exit(EXIT_FAILURE); // Added this line to exit child process
+        }
+        else
+        {
             int status;
             waitpid(pid, &status, 0);
 
-            // Check if the child exited normally
-            if (WIFEXITED(status)) {
+            if (WIFEXITED(status))
+            {
                 int exit_status = WEXITSTATUS(status);
-                if (exit_status != 0) {
+                if (exit_status != 0)
+                {
                     fprintf(stderr, "MyShell: %s: Exit status %d\n", args[0], exit_status);
                 }
-            } else if (WIFSIGNALED(status)) {
+            }
+            else if (WIFSIGNALED(status))
+            {
                 int signal_num = WTERMSIG(status);
                 fprintf(stderr, "MyShell: %s: Terminated by signal %d\n", args[0], signal_num);
             }
-        }
-
-        // Close file descriptors (same as before)
-
-        if (strcmp(input, "exit") == 0) {
-            break;
         }
     }
 
     return 0;
 }
+

@@ -7,64 +7,56 @@
 #define MAX_INPUT_SIZE 1024
 #define MAX_ARGS 64
 
-// Function to parse input into arguments
-int parse_input(char* input, char** args) {
-    int arg_count = 0;
-    
-    // Use strtok to split the input into arguments
-    char* token = strtok(input, " \t\n");
-    while (token != NULL && arg_count < MAX_ARGS - 1) {
-        args[arg_count] = token;
-        arg_count++;
-        token = strtok(NULL, " \t\n");
-    }
-    args[arg_count] = NULL; // Null-terminate the argument list
-    
-    return arg_count; // Return the number of arguments
-}
+int parse_input(char *input, char **args);
 
-int main() {
-    while (1) {
-        char input[MAX_INPUT_SIZE];
+/**
+ * main - Entry point for the shell
+ *
+ * Return: Always 0
+ */
+int main(void)
+{
+    char input[MAX_INPUT_SIZE];
+    char *args[MAX_ARGS];
+    int arg_count;
 
+    while (1)
+    {
         printf("MyShell> ");
-        
-        if (fgets(input, sizeof(input), stdin) == NULL) {
+
+        if (fgets(input, sizeof(input), stdin) == NULL)
+        {
             perror("fgets");
             exit(EXIT_FAILURE);
         }
 
         input[strcspn(input, "\n")] = '\0';
 
-        // Parse input into arguments
-        char* args[MAX_ARGS];
-        int arg_count = parse_input(input, args);
+        arg_count = parse_input(input, args);
 
-        if (arg_count > 0) {
-            // Handle built-in commands
-            if (strcmp(args[0], "exit") == 0) {
-                // Exit the shell
+        if (arg_count > 0)
+        {
+            if (strcmp(args[0], "exit") == 0)
+            {
                 break;
-            } else if (strcmp(args[0], "cd") == 0) {
-                // Change directory
-                if (arg_count > 1) {
-                    if (chdir(args[1]) != 0) {
+            }
+            else if (strcmp(args[0], "cd") == 0)
+            {
+                if (arg_count > 1)
+                {
+                    if (chdir(args[1]) != 0)
+                    {
                         perror("cd");
                     }
                 }
-                continue; // Skip command execution for "cd"
+                continue;
             }
         }
 
-        // Print the parsed arguments (for demonstration purposes)
-        printf("Parsed arguments:\n");
-        for (int i = 0; i < arg_count; i++) {
-            printf("args[%d]: %s\n", i, args[i]);
-        }
+        /* Implement command execution here using execve()*/
 
-        // Implement command execution here using execve()
-
-        if (strcmp(input, "exit") == 0) {
+        if (strcmp(input, "exit") == 0)
+        {
             break;
         }
     }

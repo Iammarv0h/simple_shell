@@ -9,9 +9,9 @@
 #define MAX_INPUT_SIZE 1024
 #define MAX_ARGS 64
 
-// Function to parse input into arguments (same as before)
+/*Function to parse input into arguments*/
 int parse_input(char* input, char** args) {
-    // ... (unchanged)
+    /* ... (unchanged)*/
 }
 
 int main() {
@@ -27,25 +27,25 @@ int main() {
 
         input[strcspn(input, "\n")] = '\0';
 
-        // Parse input into arguments
+        /* Parse input into arguments*/
         char* args[MAX_ARGS];
         int arg_count = parse_input(input, args);
 
         if (arg_count > 0) {
-            // Handle built-in commands (same as before)
+            /* Handle built-in commands*/
         }
 
-        // Execute external commands using execve()
+        /* Execute external commands using execve()*/
         pid_t pid = fork();
         if (pid == 0) {
-            // Child process
+            /*Child process*/
             execve(args[0], args, NULL);
-            perror("execve"); // This line will only execute if execve fails
+            perror("execve"); /*This line will only execute if execve fails*/
             exit(EXIT_FAILURE);
         } else if (pid < 0) {
             perror("fork");
         } else {
-            // Parent process
+            /* Parent process*/
             waitpid(pid, NULL, 0);
         }
 
