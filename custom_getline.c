@@ -1,48 +1,54 @@
 #include "shell.h"
-#include <unistd.h> /*Include the necessary header for read and STDIN_FILENO*/
+#include <unistd.h>
 
 #define BUFFER_SIZE 1024
 
-char *custom_getline(void) {
-    static char buffer[BUFFER_SIZE];
-    static size_t pos = 0;
-    static ssize_t len = 0; /* Use ssize_t for read return value*/
+/**
+ * custom_getline - Read a line from standard input.
+ *
+ * Return: A dynamically allocated string containing the read line,
+ *         or NULL if there's no more input or an error occurs.
+ */
+char *custom_getline(void)
+{
+	static char buffer[BUFFER_SIZE];
+	static size_t pos;
+	static ssize_t len;
 
-    char *line = NULL;
-    size_t line_len = 0;
+	char *line = NULL;
+	size_t line_len = 0;
 
-    while (1) {
-        char c; /* Move the declaration of 'c' here*/
+	while (1)
+	{
+		char c;
 
-        if (pos >= (size_t)len) {
-            len = read(STDIN_FILENO, buffer, BUFFER_SIZE);
-            pos = 0;
+		if (pos >= (size_t)len)
+		{
+			len = read(STDIN_FILENO, buffer, BUFFER_SIZE);
+			pos = 0;
 
-            if (len == 0) {
-                if (line_len == 0) {
-                    return NULL;
-                } else {
-                    break;
-                }
-            } else if (len == (ssize_t)-1) {
-                perror("read");
-                return NULL;
-            }
-        }
-
-        c = buffer[pos++];
-        if (c == '\n') {
-            break;
-        }
-
-        line = realloc(line, line_len + 2);
-        if (line == NULL) {
-            perror("realloc");
-            return NULL;
-        }
-        line[line_len++] = c;
-        line[line_len] = '\0';
-    }
-
-    return line;
+			if (len == 0)
+			{
+				if (line_len == 0)
+					return (NULL);
+			}
+			else if (len == (ssize_t)-1)
+			{
+				perror("read");
+				return (NULL);
+			}
+		}
+		c = buffer[pos++];
+		if (c == '\n')
+			break;
+		line = realloc(line, line_len + 2);
+		if (line == NULL)
+		{
+			perror("realloc");
+			return (NULL);
+		}
+		line[line_len++] = c;
+		line[line_len] = '\0';
+	}
+	return (line);
 }
