@@ -20,4 +20,6 @@ int env_set_key(const char *key, const char *value, data_of_program *data);
 int env_remove_key(const char *key, data_of_program *data);
 void print_environ(data_of_program *data);
 
+void builtin_exit(char *input);
+
 #endif /* MAIN_H */

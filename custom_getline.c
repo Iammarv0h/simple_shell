@@ -13,8 +13,8 @@
 char *custom_getline(void)
 {
 	static char buffer[BUFFER_SIZE];
-	static size_t pos;
-	static ssize_t len;
+	static size_t pos = 0;
+	static ssize_t len = 0;
 
 	char *line = NULL;
 	size_t line_len = 0;
