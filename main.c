@@ -1,3 +1,4 @@
+#include "shell.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,60 +10,70 @@
 
 int main(void)
 {
-	char *line = NULL;
-	size_t len = 0;
-	pid_t pid;
-	char *args[MAX_INPUT_LENGTH];
-	char *token;
-	int i = 0;
+    char *line = NULL;
+    size_t len = 0;
+    pid_t pid;
+    char *args[MAX_INPUT_LENGTH];
+    char *token;
+    int i = 0;
 
-	while (1)
-	{
-		printf("$ ");
+    while (1)
+    {
+        printf("$ ");
 
-		if (getline(&line, &len, stdin) == -1)
-		{
-			break;
-		}
-		line[strcspn(line, "\n")] = '\0';
-
-		if (strcmp(line, "exit") == 0)
-		{
-			break;
-		}
-
-		i = 0;
-		token = strtok(line, " ");
-
-		while (token != NULL)
-		{
-			args[i] = token;
-			i++;
-			token = strtok(NULL, " ");
-		}
-
-		args[i] = NULL;
-
-		pid = fork();
-
-		if (pid == -1)
-		{
-			perror("fork");
-		}
-		else if (pid == 0)
-		{
-			if (execvp(args[0], args) == -1)
-			{
-				perror("execvp");
-				_exit(EXIT_FAILURE);
-			}
+        if (getline(&line, &len, stdin) == -1)
+        {
+            break;
         }
-		else
-		{
-			int status;
-			waitpid(pid, &status, 0);
-		}
-		free(line);
-	}
-	return (0);
+
+        line[strcspn(line, "\n")] = '\0';
+
+        if (strcmp(line, "exit") == 0)
+        {
+            free(line);
+            exit(0);
+        }
+        else if (strncmp(line, "exit ", 5) == 0)
+        {
+            int exit_status = atoi(line + 5);
+            free(line);
+            exit(exit_status);
+        }
+
+        i = 0;
+        token = strtok(line, " ");
+
+        while (token != NULL)
+        {
+            args[i] = token;
+            i++;
+            token = strtok(NULL, " ");
+        }
+
+        args[i] = NULL;
+
+        pid = fork();
+
+        if (pid == -1)
+        {
+            perror("fork");
+        }
+        else if (pid == 0)
+        {
+            if (execvp(args[0], args) == -1)
+            {
+                perror("execvp");
+                _exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            int status;
+            waitpid(pid, &status, 0);
+        }
+
+        free(line);
+    }
+
+    return 0;
 }
