@@ -1,5 +1,6 @@
 #include "shell.h"
 #include <unistd.h>
+#include <stdlib.h>
 
 #define BUFFER_SIZE 1024
 
@@ -31,6 +32,7 @@ char *custom_getline(void)
 			{
 				if (line_len == 0)
 					return (NULL);
+				break;
 			}
 			else if (len == (ssize_t)-1)
 			{
