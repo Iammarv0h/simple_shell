@@ -1,52 +1,60 @@
-#include "shell.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-/**
- * main - Entry point for the simple shell program
- *
- * Description: This function implements a basic Unix shell that reads
- * commands from the user, executes them, and displays the results.
- * It provides a prompt, reads user input, processes the input,
- * and executes the appropriate command.
- *
- * Return: Always 0
- */
+#define MAX_INPUT_LENGTH 1024
 
-int main(void)
-{
-	char *prompt = "(simple_shell $ ";
-	char *lineptr;
-	char *args[MAX_ARGS];
+int main(void) {
+    char *line = NULL;
+    size_t len = 0;
+    pid_t pid;
+    char *args[MAX_INPUT_LENGTH];
+    char *token;
+    int i = 0;
 
-	while (1)
-	{
-		int arg_count;
+    while (1) {
+        printf("$ ");
 
-		printf("%s", prompt);
-		lineptr = custom_getline();
+        if (getline(&line, &len, stdin) == -1) {
+            break;
+        }
 
-		if (lineptr == NULL)
-		{
-			printf("Exiting shell....\n");
-			return (-1);
-		}
+        line[strcspn(line, "\n")] = '\0';
 
-		arg_count = parse_input(lineptr, args);
-		if (arg_count > 0)
-		{
-			if (strcmp(args[0], "setenv") == 0)
-			{
-				shell_setenv(args);
-			}
-			else if (strcmp(args[0], "unsetenv") == 0)
-			{
-				shell_unsetenv(args);
-			}
-			else
-			{
-				execmd(args);
-			}
-		}
-		free(lineptr);
-	}
-	return (0);
+        if (strcmp(line, "exit") == 0) {
+            break;
+        }
+
+        i = 0;
+        token = strtok(line, " ");
+
+        while (token != NULL) {
+            args[i] = token;
+            i++;
+            token = strtok(NULL, " ");
+        }
+
+        args[i] = NULL;
+
+        pid = fork();
+
+        if (pid == -1) {
+            perror("fork");
+        } else if (pid == 0) {
+            if (execvp(args[0], args) == -1) {
+                perror("execvp");
+                _exit(EXIT_FAILURE);
+            }
+        } else {
+            int status;
+            waitpid(pid, &status, 0);
+        }
+
+        free(line);
+    }
+
+    return 0;
 }

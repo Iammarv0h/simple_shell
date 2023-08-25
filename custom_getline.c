@@ -1,4 +1,5 @@
 #include "shell.h"
+#include <unistd.h> /*Include the necessary header for read and STDIN_FILENO*/
 
 #define BUFFER_SIZE 1024
 
@@ -19,13 +20,13 @@ char *custom_getline(void) {
 
             if (len == 0) {
                 if (line_len == 0) {
-                    return (NULL);
+                    return NULL;
                 } else {
                     break;
                 }
             } else if (len == (ssize_t)-1) {
                 perror("read");
-                return (NULL);
+                return NULL;
             }
         }
 
@@ -37,11 +38,11 @@ char *custom_getline(void) {
         line = realloc(line, line_len + 2);
         if (line == NULL) {
             perror("realloc");
-            return (NULL);
+            return NULL;
         }
         line[line_len++] = c;
         line[line_len] = '\0';
     }
 
-    return (line);
+    return line;
 }
